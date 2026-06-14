@@ -306,3 +306,15 @@ Possible tracks:
 - In-house SSZ
 - Networking specs impl
 - Rust → Lean4 generation and formal verification
+
+### Lodestar: Adversarial Node
+
+By Nico Flaig (@nflaig)
+
+`deathstar` is an adversarial Lodestar node with the purpose of causing chaos on devnets and discovering bugs in clients. A very simple and unpolished implementation already exists and [caused havoc on glamsterdam-devnet-5](https://discord.com/channels/595666850260713488/892088344438255616/1513952830543888475). This project is about coming up with new malicious features, extending the implementation, making it configurable and more polished. The main focus for now should be on Glamsterdam devnets but it doesn't need to stop there, we can also use it in Hegotá (FOCIL) devnets later on.
+
+### Lodestar: EIP-7732 Builder
+
+By Nico Flaig (@nflaig)
+
+This project is about implementing an in-protocol builder (`lodestar builder`) under EIP-7732 for Glamsterdam. It will submit bids to p2p every slot based on payloads it produces locally with vanilla EL software (e.g. Nethermind or Ethrex), publish the payloads if it wins the auction and pays the proposer via trustless payment. The primary purpose of this project is to explore the specs and find gaps that need to be resolved to cleanly implement a CL client acting as a builder.
