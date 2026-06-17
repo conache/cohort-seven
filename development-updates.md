@@ -8,7 +8,6 @@ Add your name **alphabetically** and link your updates to the corresponding tabl
 
 Phase one is the very beginning of the cohort. The first few weeks are dedicated to general learning about the EPF program, the Ethereum protocol as a whole and its development. Use resources from [EPF Study group](https://epf.wiki) to get started and make yourself familiar with various areas of Ethereum.
 
-
 | Name/GH                                         | Week 0                                                                                              | Week 1 | Week 2 |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------ | ------ |
 | [Abhivansh](https://github.com/akronim26)       | [Update 0](https://hackmd.io/@astaxxoo/ByJ3Fhtbzg)                                                  |        |        |
@@ -19,6 +18,7 @@ Phase one is the very beginning of the cohort. The first few weeks are dedicated
 | [Blessing](https://github.com/dicethedev/)      | [Update 0](https://hackmd.io/@dicethedev/HkHB60wZfl)                                                |        |        |
 | [Conall](https://github.com/XRS-001/)           | [ Update 0](https://docs.fileverse.io/d/02001110001b#k=0YDBXHva0sJIlCC108YBhFhNP_4PFWtxqoGaQOqcFhM) |        |        |
 | [Cristian](https://github.com/conache/)         | [ Update 0](https://hackmd.io/@conache/rywURItWzx)                                                  |        |        |
+| [Daniel](https://github.com/perfogic)           | [Update 0](https://hackmd.io/@rY6uGs23RIKpNYTQc4mY_g/SkvmzE0Zfe)                                    |        |        |
 | [Jack CC](https://github.com/JackCC703/)        | [Update 0](https://hackmd.io/@jackcc/epf7-week0)                                                    |        |        |
 | [Keshav](https://www.github.com/keshavsharma25) | [Update 0](https://hackmd.io/@keshav0x/SJpIr3UWfl)                                                  |        |        |
 | [Kris](https://github.com/krisoshea-eth/)       | [Update 0](https://hackmd.io/@krisos/rJZ18M_-fg)                                                    |        |        |
@@ -31,8 +31,6 @@ Phase one is the very beginning of the cohort. The first few weeks are dedicated
 | [Vansh](https://github.com/vanshsahay)          | [Update 0](https://hackmd.io/@vanshsahay/ByEF5juZMl)                                                 |        |        |
 | [Zidan](https://github.com/mzf11125)            | [Update 0](https://hackmd.io/@MpYoLwpETrKvUBs2PpmPxA/BJC-dHOZze)                                    |        |        |
 | [Ray](https://github.com/rayjun)                | [Update 0](https://hackmd.io/@zBK5wwtLTrqYmlLNZd8CPA/HJKQsAi-Me)                                    |        |        |
-
-
 
 ## Phase 2: Deep dive
 
