@@ -33,7 +33,7 @@ Phase one is the very beginning of the cohort. The first few weeks are dedicated
 | [Parth](https://github.com/ParthSinghPS)        | [Update 0](https://hackmd.io/@ParthSinghPS/HJMWUn6xzg)                                              |        |        |
 | [Rahul](https://github.com/rahulbarmann/)       | [Update 0](https://hackmd.io/@8t0zzURJSC6IX5BOuOiGqQ/Sk0vwhHZfg)                                    |        |        |
 | [Richard](https://github.com/richardgreg)      | [Update 0](https://richardgreg.github.io/ethereum-protocol-fellowship/2026/06/10/week-0.html)        |        |        |
-| [Sagar](https://www.github.com/SoarinSkySagar)  | [Update 0](https://hackmd.io/@5d9IS104QYmhm-pr1ypNJg/Bk3xoWQbGg)                                    |        |        |
+| [Sagar](https://www.github.com/SoarinSkySagar)  | [Update 0](https://hackmd.io/@5d9IS104QYmhm-pr1ypNJg/Bk3xoWQbGg)                                    |    [Update 1](https://hackmd.io/@5d9IS104QYmhm-pr1ypNJg/rywA-N4Mzx)    |        |
 | [Tosin](https://www.github.com/tosynthegeek)    | [Update 0](https://hackmd.io/@tosynthgeek/BJCL-EFbfe)                                               |        |        |
 | [Ray](https://github.com/rayjun)                | [Update 0](https://hackmd.io/@zBK5wwtLTrqYmlLNZd8CPA/HJKQsAi-Me)                                    |        |        |
 | [Sameer](https://github.com/SamAg19)            | [Update 0](https://hackmd.io/@samag19/BkqGmuHbzl)                                                   |        |        |
