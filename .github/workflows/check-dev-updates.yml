@@ -1,28 +1,22 @@
 # NOTE: AI slop - generated, unreviewed.
-name: Check dev-updates table
+name: dev-updates script tests
 
 on:
   pull_request:
     paths:
-      - 'development-updates.md'
       - 'scripts/dev_updates.py'
       - 'scripts/test_dev_updates.py'
+      - '.github/scripts/resolve_pr.py'
 
 permissions:
   contents: read
 
 jobs:
-  check:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Run self-tests
-        run: python3 scripts/test_dev_updates.py
-      - name: Check formatting
-        run: |
-          if ! python3 scripts/dev_updates.py format development-updates.md --check; then
-            echo "::warning file=development-updates.md::Not formatted; auto-merge will fix it."
-          fi
+      - run: python3 scripts/test_dev_updates.py

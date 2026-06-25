@@ -1,5 +1,5 @@
-# NOTE: AI slop - generated, unreviewed.
 #!/usr/bin/env python3
+# NOTE: AI slop - generated, unreviewed.
 import json
 import os
 import subprocess
@@ -19,7 +19,7 @@ def api(path):
         headers={
             "Authorization": f"Bearer {TOKEN}",
             "Accept": "application/vnd.github+json",
-            "User-Agent": "auto-merge-dev-updates",
+            "User-Agent": "dev-updates-mergeable",
         },
     )
     with urllib.request.urlopen(req) as r:
@@ -29,9 +29,7 @@ def api(path):
 def run(cmd, check=True, capture=False):
     print("+ " + " ".join(cmd), flush=True)
     res = subprocess.run(cmd, check=check, text=True, capture_output=capture)
-    if capture:
-        return res.stdout.strip()
-    return ""
+    return res.stdout.strip() if capture else ""
 
 
 def git_show(ref_path):
@@ -39,35 +37,39 @@ def git_show(ref_path):
     return res.stdout if res.returncode == 0 else ""
 
 
+def fail(msg):
+    print(f"::error::{msg}")
+    return 1
+
+
 def main(pr_number):
     pr = api(f"/repos/{REPO}/pulls/{pr_number}")
     if pr.get("state") != "open":
-        print(f"PR #{pr_number} not open; skipping.")
+        print(f"PR #{pr_number} not open; nothing to do.")
         return 0
 
     head_repo = pr["head"]["repo"]["full_name"]
     head_branch = pr["head"]["ref"]
-    head_sha = pr["head"]["sha"]
     base_branch = pr["base"]["ref"]
     maintainer_can_modify = pr.get("maintainer_can_modify", False)
+    owner = REPO.split("/")[0]
+    same_repo = head_repo.split("/")[0] == owner
 
     files = api(f"/repos/{REPO}/pulls/{pr_number}/files")
     if not any(f["filename"] == FILE for f in files):
-        print(f"PR #{pr_number} does not touch {FILE}; skipping.")
+        print(f"PR #{pr_number} does not touch {FILE}; nothing to do.")
         return 0
 
-    owner = REPO.split("/")[0]
     auth_remote = f"https://x-access-token:{TOKEN}@github.com/{head_repo}.git"
 
     run(["git", "fetch", "origin", base_branch], check=True)
-    # BUGFIX: reset remote each iteration; it may point at a different fork.
     run(["git", "remote", "remove", "prhead"], check=False)
     run(["git", "remote", "add", "prhead", auth_remote], check=True)
-    run(["git", "fetch", "prhead", head_branch], check=True)
+    # Fetch the branch tip into a stable local ref so git show always resolves.
+    run(["git", "fetch", "prhead", f"{head_branch}:_prhead"], check=True)
 
-    head_ref = head_sha
+    head_ref = "_prhead"
     main_ref = f"origin/{base_branch}"
-
     merge_base = run(["git", "merge-base", head_ref, main_ref], capture=True)
     print(f"merge-base = {merge_base}")
 
@@ -80,67 +82,43 @@ def main(pr_number):
         open(bp, "w").write(base_content)
         open(op, "w").write(ours_content)
         open(tp, "w").write(theirs_content)
-
         res = subprocess.run(
             [sys.executable, MERGE_SCRIPT, "merge", bp, op, tp, "--output", mp],
             text=True, capture_output=True,
         )
         print(res.stdout)
-        print(res.stderr, file=sys.stderr)
+        if res.stderr:
+            print(res.stderr, file=sys.stderr)
         merged = open(mp).read()
 
-    if res.returncode != 0:
-        comment(pr_number,
-                ":warning: Auto-merge could not resolve `development-updates.md` "
-                "(two changes target the same cell). Look for `<!-- CONFLICT` markers.")
-        print(f"PR #{pr_number}: real conflict, left a comment.")
-        return 0
+    if res.returncode != 0 or "<!-- CONFLICT" in merged:
+        return fail(
+            "Two changes target the same cell in development-updates.md. "
+            "Resolve manually (look for '<!-- CONFLICT' markers)."
+        )
 
     if merged == ours_content:
-        print(f"PR #{pr_number}: already up to date; nothing to push.")
+        print(f"PR #{pr_number}: already in sync with {base_branch}; mergeable.")
         return 0
 
-    if not maintainer_can_modify and head_repo.split("/")[0] != owner:
-        comment(pr_number,
-                ":information_source: This PR conflicts with `development-updates.md`. "
-                "Enable \"Allow edits by maintainers\" and I'll re-run, or run "
-                "`python scripts/dev_updates.py format development-updates.md` locally.")
-        print(f"PR #{pr_number}: cannot push (maintainer edits disabled).")
-        return 0
+    if not maintainer_can_modify and not same_repo:
+        return fail(
+            "This PR conflicts with development-updates.md and 'Allow edits by "
+            "maintainers' is off, so the branch can't be synced automatically. "
+            "Enable it and re-run this check, or run "
+            "`python3 scripts/dev_updates.py format development-updates.md` locally."
+        )
 
     run(["git", "checkout", "-B", "_autofix", head_ref])
     open(FILE, "w").write(merged)
     run(["git", "add", FILE])
-    diff = subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode
-    if diff == 0:
-        print(f"PR #{pr_number}: no net change; skipping push.")
+    if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode == 0:
+        print(f"PR #{pr_number}: no net change; mergeable.")
         return 0
-    run(["git", "commit", "-m", "Auto-merge main into development-updates.md"])
+    run(["git", "commit", "-m", "Sync development-updates.md with base branch"])
     run(["git", "push", "prhead", f"_autofix:{head_branch}"])
-    comment(pr_number,
-            ":white_check_mark: Synced `development-updates.md` with `main` and "
-            "re-formatted. Your update is preserved and the PR should be mergeable.")
-    print(f"PR #{pr_number}: pushed to {head_repo}:{head_branch}.")
+    print(f"PR #{pr_number}: synced and pushed to {head_repo}:{head_branch}.")
     return 0
-
-
-def comment(pr_number, body):
-    data = json.dumps({"body": body}).encode()
-    req = urllib.request.Request(
-        f"https://api.github.com/repos/{REPO}/issues/{pr_number}/comments",
-        data=data,
-        headers={
-            "Authorization": f"Bearer {TOKEN}",
-            "Accept": "application/vnd.github+json",
-            "User-Agent": "auto-merge-dev-updates",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
-    try:
-        urllib.request.urlopen(req)
-    except Exception as e:
-        print(f"(could not post comment: {e})")
 
 
 if __name__ == "__main__":

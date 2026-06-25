@@ -331,9 +331,15 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 0
 
     if args.cmd == "merge":
+        raw_ours = read(args.ours)
+        raw_theirs = read(args.theirs)
+        for label, txt in (("ours", raw_ours), ("theirs", raw_theirs)):
+            if re.search(r"^(<{7}|={7}|>{7})", txt, re.MULTILINE):
+                sys.stderr.write(f"merge: {label} already contains git conflict markers\n")
+                return 1
         base = do_format(read(args.base))
-        ours = do_format(read(args.ours))
-        theirs = do_format(read(args.theirs))
+        ours = do_format(raw_ours)
+        theirs = do_format(raw_theirs)
         merged, conflict = merge_documents(base, ours, theirs)
         out = args.output or args.ours
         write(out, merged)

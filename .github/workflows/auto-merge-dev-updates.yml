@@ -1,94 +1,42 @@
 # NOTE: AI slop - generated, unreviewed.
-name: Auto-merge dev-updates table
+name: dev-updates mergeable
 
 on:
-  push:
-    branches: [main]
-    paths: ['development-updates.md']
   pull_request_target:
-    types: [labeled, opened]
+    types: [opened, synchronize, reopened]
     paths: ['development-updates.md']
-  issue_comment:
-    types: [created]
-  workflow_dispatch:
-    inputs:
-      pr:
-        description: 'PR number to fix (retrospective)'
-        required: true
-        type: string
 
 permissions:
   contents: write
-  pull-requests: write
+  pull-requests: read
 
 concurrency:
-  group: auto-merge-dev-updates-${{ github.event.pull_request.number || github.event.issue.number || inputs.pr || github.ref }}
-  cancel-in-progress: false
+  group: dev-updates-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   resolve:
     runs-on: ubuntu-latest
     steps:
-      - name: Decide which PR(s) to process
-        id: scope
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const ev = context.eventName;
-            const out = [];
-            const allOpen = async () => {
-              const prs = await github.paginate(github.rest.pulls.list, {
-                owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100,
-              });
-              return prs.map(p => p.number);
-            };
-            if (ev === 'push') {
-              for (const n of await allOpen()) out.push(n);
-            } else if (ev === 'pull_request_target') {
-              const pr = context.payload.pull_request;
-              if (context.payload.action === 'labeled') {
-                if (context.payload.label.name === 'auto-merge') out.push(pr.number);
-              } else {
-                out.push(pr.number);
-              }
-            } else if (ev === 'issue_comment') {
-              const c = context.payload;
-              if (c.issue.pull_request && c.comment.body.trim().startsWith('/auto-merge')) {
-                const assoc = c.comment.author_association;
-                if (['OWNER','MEMBER','COLLABORATOR'].includes(assoc)) out.push(c.issue.number);
-              }
-            } else if (ev === 'workflow_dispatch') {
-              out.push(parseInt(context.payload.inputs.pr, 10));
-            }
-            const uniq = [...new Set(out.filter(Boolean))];
-            core.setOutput('prs', JSON.stringify(uniq));
-
-      - name: Checkout base repo
-        if: steps.scope.outputs.prs != '[]'
+      - name: Checkout base branch scripts (from base repo, never PR code)
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event.pull_request.base.ref }}
           fetch-depth: 0
+          persist-credentials: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
-        if: steps.scope.outputs.prs != '[]'
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Resolve & push each PR
-        if: steps.scope.outputs.prs != '[]'
+      - name: Resolve table conflict and sync PR branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PRS: ${{ steps.scope.outputs.prs }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           cp scripts/dev_updates.py /tmp/dev_updates.py
-          for PR in $(echo "$PRS" | python3 -c "import json,sys;print(' '.join(map(str,json.load(sys.stdin))))"); do
-            echo "::group::PR #$PR"
-            python3 .github/scripts/resolve_pr.py "$PR" || echo "PR #$PR skipped/failed"
-            echo "::endgroup::"
-          done
+          python3 .github/scripts/resolve_pr.py "$PR_NUMBER"

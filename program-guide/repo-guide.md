@@ -95,38 +95,8 @@ Feel free to create a document under the path `/notes/<your-name>.md`. This docu
 
 This document isn't meant to be a "profile". It is meant to be used especially in the [first phases](/program-guide/program-details.md#phase-one) of the program where most of the exploration takes place. 
 
-### Merging Pull Requests
-
-Merge access will be granted relatively widely. Cohort organizers will merge your first PRs but then feel free to reach out to get the access. 
-
 When submitting a PR, make sure you are using the latest main branch. Otherwise [rebase and keep your changes always on top](#2-keeping-your-local-repository-up-to-date) to be sure you are not deleting content of others.
 
 When merging someone else's PR, use your best judgement and ask if you are unsure. 
 
 If your IDE or system creates some hidden config files (e.g. `.vscode/...`), please make sure you don't upload them to the repo by updating the `.gitignore`. 
-
-### Automatic table merging
-
-`development-updates.md` is a single large table edited by everyone, so PRs frequently show merge conflicts even when two people just filled different cells. This is caused by markdown column-width whitespace, not by real conflicting edits. The repo automates the fix so you rarely need to resolve a conflict by hand.
-
-**What runs automatically**
-
-- A GitHub Action ([`.github/workflows/auto-merge-dev-updates.yml`](/.github/workflows/auto-merge-dev-updates.yml)) merges the latest `main` into your PR branch using a *semantic* table merge, re-formats the table, and pushes the result back to your branch. It keeps everyone's existing data (filled cells and rows are never deleted) and adds your update on top. Your PR becomes mergeable again.
-- It runs when `main` changes, when a maintainer adds the `auto-merge` label or comments `/auto-merge`, and can be run on any older PR via *Actions → Auto-merge dev-updates table → Run workflow* with the PR number.
-- For the bot to push to your fork branch, keep **"Allow edits by maintainers"** checked when opening the PR (it's on by default). If it's off, the bot leaves a comment and you can run the formatter yourself (below).
-- Only genuine conflicts (two different links in the *same* cell) are left for a human; the bot marks them with `<!-- CONFLICT ... -->` and comments on the PR.
-
-**Doing it locally**
-
-The same logic lives in [`scripts/dev_updates.py`](/scripts/dev_updates.py) (Python 3, no dependencies):
-
-```
-# format the table canonically (idempotent)
-python3 scripts/dev_updates.py format development-updates.md
-
-# one-time: make `git merge`/`rebase`/`pull` resolve the table automatically
-bash scripts/setup-merge-driver.sh
-```
-
-After running the setup script once, keeping your branch in sync (`git rebase epf7/main` or `git pull`) merges the table for you without conflicts.
-
