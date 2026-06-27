@@ -1,0 +1,22 @@
+# NOTE: AI slop - generated, unreviewed.
+name: dev-updates script tests
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/dev_updates.py'
+      - 'scripts/test_dev_updates.py'
+      - '.github/scripts/resolve_pr.py'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 scripts/test_dev_updates.py

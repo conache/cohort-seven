@@ -1,0 +1,49 @@
+# NOTE: AI slop - generated, unreviewed.
+name: dev-updates mergeable
+
+on:
+  pull_request_review:
+    types: [submitted]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR number to sync'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: dev-updates-${{ github.event.pull_request.number || github.event.inputs.pr }}
+  cancel-in-progress: true
+
+jobs:
+  resolve:
+    # Manual run, or when a review is submitted with state "approved".
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.review.state == 'approved' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout base branch scripts (from base repo, never PR code)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref || github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Resolve table conflict and sync PR branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          cp scripts/dev_updates.py /tmp/dev_updates.py
+          python3 .github/scripts/resolve_pr.py "$PR_NUMBER"
