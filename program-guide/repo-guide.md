@@ -29,7 +29,8 @@ You should:
 - Post your first update within the first week of starting into the program, write about your initial research. 
 - Post your update somewhere public. Publishing using an external blog, [HackMD](https://hackmd.io/c/tutorials/%2Fs%2Ftutorials) or own website are all great. Link it in the main [`development-updates.md` document](/development-updates.md) in the corresponding table. Open a PR from a branch dedicated to a specific week in your fork of the repo, check the [guide for using git below](#using-git-for-collaboration) for more details.
 - Ensure that the content is published publicly before adding it's link in the [`development-updates.md` document](/development-updates.md). Trying out the link in your browser's incognito / private mode is a great way to test this.
-- Make sure the markdown table is properly formatted before you push your commits. You can use a local IDE with markdown support, HackMD or [table formatting tool](https://github.com/nvuillam/markdown-table-formatter).
+- Make sure the markdown table is properly formatted before you push your commits. You can use a local IDE with markdown support, HackMD or [table formatting tool](https://github.com/nvuillam/markdown-table-formatter). The simplest option is to run the bundled formatter from the repo root: `python3 scripts/dev_updates.py format development-updates.md`.
+- You don't need to worry much about merge conflicts on the table. An automation keeps `development-updates.md` mergeable: it merges the latest `main` into your PR without deleting anyone's data and re-formats the table. See [Automatic table merging](#automatic-table-merging) below.
 - Share your development update to current thread in R&D Discord `#protocol-fellowship` channel.
 - Not use an LLM or similar tech for generating your updates. The point is to exercise your technical writing and expressing ideas, generated updates won't be accepted.
 
@@ -94,13 +95,33 @@ Feel free to create a document under the path `/notes/<your-name>.md`. This docu
 
 This document isn't meant to be a "profile". It is meant to be used especially in the [first phases](/program-guide/program-details.md#phase-one) of the program where most of the exploration takes place. 
 
-### Merging Pull Requests
-
-Merge access will be granted relatively widely. Cohort organizers will merge your first PRs but then feel free to reach out to get the access. 
-
 When submitting a PR, make sure you are using the latest main branch. Otherwise [rebase and keep your changes always on top](#2-keeping-your-local-repository-up-to-date) to be sure you are not deleting content of others.
 
 When merging someone else's PR, use your best judgement and ask if you are unsure. 
 
 If your IDE or system creates some hidden config files (e.g. `.vscode/...`), please make sure you don't upload them to the repo by updating the `.gitignore`. 
 
+### Automatic table merging
+
+`development-updates.md` is a single large table edited by everyone, so PRs frequently show merge conflicts even when two people just filled different cells. This is caused by markdown column-width whitespace, not by real conflicting edits. The repo automates the fix so you rarely need to resolve a conflict by hand.
+
+**What runs automatically**
+
+- A GitHub Action ([`.github/workflows/auto-merge-dev-updates.yml`](/.github/workflows/auto-merge-dev-updates.yml)) runs whenever a PR touching the table is opened or updated. It merges the latest base branch into your PR branch using a *semantic* table merge, re-formats the table, and pushes the result back to your branch. It keeps everyone's existing data (filled cells and rows are never deleted) and adds your update on top. When the run is green, your PR is mergeable.
+- To run it on an existing/older PR (one opened before this automation existed, so the workflow never fired on it), a maintainer goes to **Actions → dev-updates mergeable → Run workflow** and enters the PR number. Pushing any new commit to the PR also triggers it.
+- For the action to push to your fork branch, keep **"Allow edits by maintainers"** checked when opening the PR (it's on by default). If it's off, the run fails and you can run the formatter yourself (below).
+- Only genuine conflicts (two different links in the *same* cell) make the run fail; resolve those manually by looking for `<!-- CONFLICT ... -->` markers.
+
+**Doing it locally**
+
+The same logic lives in [`scripts/dev_updates.py`](/scripts/dev_updates.py) (Python 3, no dependencies):
+
+```
+# format the table canonically (idempotent)
+python3 scripts/dev_updates.py format development-updates.md
+
+# one-time: make `git merge`/`rebase`/`pull` resolve the table automatically
+bash scripts/setup-merge-driver.sh
+```
+
+After running the setup script once, keeping your branch in sync (`git rebase epf7/main` or `git pull`) merges the table for you without conflicts.
