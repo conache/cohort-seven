@@ -186,7 +186,7 @@ The final weeks of the cohort should mark the finalization of your project. Subm
 | [Blessing](https://github.com/dicethedev/) | | |
 | [Charles](https://github.com/creese) | | |
 | [Conall](https://github.com/XRS-001) | | |
-| [Cristian](https://github.com/conache/) | [Final Report](https://hackmd.io/@conache/epf7-final-report)| |
+| [Cristian](https://github.com/conache/) | [Final Report: Implementation of FOCIL in Lighthouse](https://hackmd.io/@conache/epf7-final-report)| |
 | [Daniel](https://github.com/perfogic) | | |
 | [Hans](https://github.com/vuonghuuhung) | | |
 | [Ifeoluwa](https://github.com/owanikin) | | |
